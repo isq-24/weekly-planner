@@ -85,38 +85,44 @@ const App = () => {
     fetchData();
   }, []);
 
-  // 데이터 저장 (백엔드 구조 변경에 따라 수정됨)
-  const saveDataToSheet = async (currentTasks, currentGoal, currentMemo) => {
-    if (isLoading) return;
-    setIsSaving(true);
-    
-    // 백엔드로 보낼 새로운 데이터 구조 생성
+// 데이터 저장 함수 (수정됨)
+const saveDataToSheet = async (currentTasks, currentGoal, currentMemo) => {
+  // URL 체크
+  if (!GOOGLE_SCRIPT_URL.includes("script.google.com")) return;
+  
+  setIsSaving(true);
+  try {
+    // 1. 데이터 가공
     const daysData = days.map(day => ({
       date: day.fullDate,
       label: day.label,
       tasks: currentTasks[day.key] || []
     }));
 
-    const payload = {
-      daysData,
-      weekGoal: currentGoal,
-      memo: currentMemo
-    };
+    // 2. 전송 (여기가 핵심!)
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors", // 구글 보안 정책상 필수
+      headers: {
+        // [중요] application/json 대신 text/plain을 써야 CORS 오류 없이 데이터가 전송됩니다.
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      // 객체를 문자열로 변환해서 보냄
+      body: JSON.stringify({
+        daysData: daysData,
+        weekGoal: currentGoal,
+        memo: currentMemo
+      }),
+    });
+    
+    console.log("전송 완료 (302는 정상입니다)");
 
-    try {
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    } catch (error) {
-      console.error("저장 실패:", error);
-      alert("데이터 저장에 실패했습니다.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  } catch (error) {
+    console.error("저장 실패:", error);
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   // 자동 저장 (Debounce)
   useEffect(() => {
