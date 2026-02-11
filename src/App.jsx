@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Calendar, CheckSquare, Square, RotateCcw, Loader } from 'lucide-react';
 import { startOfWeek, addDays, format, getWeekOfMonth, parseISO } from 'date-fns';
@@ -87,35 +86,34 @@ const App = () => {
 
 // 데이터 저장 함수 (수정됨)
 const saveDataToSheet = async (currentTasks, currentGoal, currentMemo) => {
-  // URL 체크
   if (!GOOGLE_SCRIPT_URL.includes("script.google.com")) return;
   
   setIsSaving(true);
   try {
-    // 1. 데이터 가공
     const daysData = days.map(day => ({
       date: day.fullDate,
       label: day.label,
       tasks: currentTasks[day.key] || []
     }));
 
-    // 2. 전송 (여기가 핵심!)
     await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
-      mode: "no-cors", // 구글 보안 정책상 필수
+      // mode: "no-cors"를 사용하면 응답을 읽을 수 없으므로, 
+      // 데이터 전송이 목적인 경우 아래 설정을 권장합니다.
       headers: {
-        // [중요] application/json 대신 text/plain을 써야 CORS 오류 없이 데이터가 전송됩니다.
         "Content-Type": "text/plain;charset=utf-8",
       },
-      // 객체를 문자열로 변환해서 보냄
       body: JSON.stringify({
         daysData: daysData,
         weekGoal: currentGoal,
         memo: currentMemo
       }),
+      // [핵심 추가] 리다이렉트를 강제로 따라가게 합니다.
+      redirect: "follow", 
     });
     
-    console.log("전송 완료 (302는 정상입니다)");
+    console.log("전송 요청 완료");
+    alert("저장되었습니다!"); // no-cors인 경우 결과값 확인이 안되므로 알림 추가
 
   } catch (error) {
     console.error("저장 실패:", error);
