@@ -4,7 +4,7 @@ import { startOfWeek, addDays, format, getWeekOfMonth, parseISO } from 'date-fns
 import { ko } from 'date-fns/locale';
 
 // 구글 Apps Script 웹 앱 URL
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKesIIpNghC9vZjNEAilDglMD0q4VPbnPCjQCciLo-kq0encndqqkSS0tYL8waUW7V/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwv9NdIN2x2G-ea4-kGuANDM2IMcTXQIz7H3h5ithEU90b_5oyFFxthBIvvTDQWxdtM/exec";
 
 // 현재 주의 날짜 데이터를 생성하는 함수
 const getWeekDays = () => {
